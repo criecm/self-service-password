@@ -1,0 +1,4 @@
+conf/config.inc.local.php
+*.bak
+*~
+lib/composer.lock
