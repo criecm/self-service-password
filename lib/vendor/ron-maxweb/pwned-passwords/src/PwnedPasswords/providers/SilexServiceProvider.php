@@ -20,7 +20,6 @@ class SilexServiceProvider implements ServiceProviderInterface
             $pp = new PwnedPasswords();
             $pp->setMethod($app['pwned_passwords.method'];
             $pp->setCurlOptions($app['pwned_passwords.curl_options']);
-            return $pp;
         }
         
     }

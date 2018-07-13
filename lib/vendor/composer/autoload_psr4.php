@@ -8,6 +8,8 @@ $baseDir = dirname($vendorDir);
 return array(
     'React\\Promise\\' => array($vendorDir . '/react/promise/src'),
     'ReCaptcha\\' => array($vendorDir . '/google/recaptcha/src/ReCaptcha'),
+    'PwnedPasswords\\' => array($vendorDir . '/ron-maxweb/pwned-passwords/src/PwnedPasswords'),
+    'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
     'Ovh\\Sms\\' => array($vendorDir . '/ovh/php-ovh-sms/src'),
     'Ovh\\' => array($vendorDir . '/ovh/ovh/src'),
     'GuzzleHttp\\Stream\\' => array($vendorDir . '/guzzlehttp/streams/src'),

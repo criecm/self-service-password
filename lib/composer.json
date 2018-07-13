@@ -1,8 +1,10 @@
 {
-    "name": "Example Application",
-    "description": "This is an example of OVH SMS APIs SDK usage",
+    "name": "Self-Service-Password",
+    "description": "LDAP Tool Box Self Service Password",
     "require": {
         "ovh/php-ovh-sms": "dev-master",
-        "google/recaptcha": "~1.1"
+        "google/recaptcha": "~1.1",
+        "ron-maxweb/pwned-passwords": "^1.2",
+        "phpmailer/phpmailer": "^6.0"
     }
 }

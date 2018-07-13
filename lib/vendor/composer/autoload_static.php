@@ -16,6 +16,11 @@ class ComposerStaticInitbfc4fc1aff3b1786e63594de035199a9
             'React\\Promise\\' => 14,
             'ReCaptcha\\' => 10,
         ),
+        'P' => 
+        array (
+            'PwnedPasswords\\' => 15,
+            'PHPMailer\\PHPMailer\\' => 20,
+        ),
         'O' => 
         array (
             'Ovh\\Sms\\' => 8,
@@ -37,6 +42,14 @@ class ComposerStaticInitbfc4fc1aff3b1786e63594de035199a9
         'ReCaptcha\\' => 
         array (
             0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
+        ),
+        'PwnedPasswords\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/ron-maxweb/pwned-passwords/src/PwnedPasswords',
+        ),
+        'PHPMailer\\PHPMailer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
         'Ovh\\Sms\\' => 
         array (
