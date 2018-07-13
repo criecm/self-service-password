@@ -64,9 +64,11 @@ function send_sms_by_api($mobile, $message, $config) {
     $Sms->setAccount($accounts[0]);
     
     // Get declared senders
+    $sender=NULL;
     if (array_key_exists("smssender",$config)) {
         $sender = $config['smssender'];
-    } else {
+    }
+    if ($sender === NULL) {
         $senders = $Sms->getSenders();
 	$sender = $senders[0];
     }
