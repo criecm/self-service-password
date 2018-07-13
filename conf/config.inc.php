@@ -215,6 +215,8 @@ $use_sms = true;
 # SMS method (mail, api)
 $sms_method = "mail";
 $sms_api_lib = "lib/smsapi.inc.php";
+# see sms provider lib if config needed
+#$sms_api_config = [];
 # GSM number attribute
 $sms_attribute = "mobile";
 # Partially hide number

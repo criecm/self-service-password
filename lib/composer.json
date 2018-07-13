@@ -1,0 +1,8 @@
+{
+    "name": "Example Application",
+    "description": "This is an example of OVH SMS APIs SDK usage",
+    "require": {
+        "ovh/php-ovh-sms": "dev-master",
+        "google/recaptcha": "~1.1"
+    }
+}

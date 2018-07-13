@@ -238,7 +238,7 @@ if ( $result === "sendsms" ) {
             include_once($sms_api_lib);
             $sms_message = str_replace('{smsresetmessage}', $messages['smsresetmessage'], $sms_message);
             $sms_message = str_replace('{smstoken}', $smstoken, $sms_message);
-            if ( send_sms_by_api($sms, $sms_message) ) {
+            if ( defined('sms_api_config') ? send_sms_by_api($sms, $sms_message) : send_sms_by_api($sms, $sms_message,$sms_api_config) ) {
                 $token  = encrypt(session_id(), $keyphrase);
                 $result = "smssent";
                 if ( !empty($reset_request_log) ) {
