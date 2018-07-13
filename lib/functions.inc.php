@@ -18,6 +18,7 @@
 # GPL License: http://www.gnu.org/licenses/gpl.txt
 #
 #==============================================================================
+require_once( __DIR__ . "/vendor/autoload.php");
 
 # Create SSHA password
 function make_ssha_password($password) {
@@ -475,7 +476,7 @@ function send_mail($mailer, $mail, $mail_from, $mail_from_name, $subject, $body,
 
     $result = false;
 
-    if(!is_a($mailer, 'PHPMailer')) {
+    if($mailer instanceof PHPMailer) {
         error_log("send_mail: PHPMailer object required!");
         return $result;
     }

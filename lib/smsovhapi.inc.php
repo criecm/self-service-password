@@ -34,7 +34,8 @@
  *
  */
 
-require __DIR__ . '/vendor/autoload.php';
+//require_once(__DIR__ . "/vendor/autoload.php");
+
 use \Ovh\Sms\SmsApi;
 
 /* @function boolean send_sms_by_api(string $mobile, string $message, array $config)
@@ -62,7 +63,7 @@ function send_sms_by_api($mobile, $message, $config) {
     // Set the account you will use
     // print_r($accounts);
     $Sms->setAccount($accounts[0]);
-    
+
     // Get declared senders
     $sender=NULL;
     if (array_key_exists("smssender",$config)) {
@@ -73,6 +74,16 @@ function send_sms_by_api($mobile, $message, $config) {
 	$sender = $senders[0];
     }
     
+    // OVH needs international '+' format
+    $mobile = preg_replace('/[^0-9\+]/','',$mobile);
+    if ( !preg_match('/^\+/',$mobile) ) {
+        if ( preg_match('/^00/',$mobile) ) {
+            $mobile=preg_replace('^00','+');
+        } 
+	if ( preg_match('/^0/',$mobile) ) {
+            $mobile=preg_replace('/^0/','+33',$mobile);
+	}
+    }
     // Create a new message
     $Message = $Sms->createMessage();
     $Message->setSender($sender);
