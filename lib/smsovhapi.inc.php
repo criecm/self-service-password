@@ -34,10 +34,6 @@
  *
  */
 
-//require_once(__DIR__ . "/vendor/autoload.php");
-
-use \Ovh\Sms\SmsApi;
-
 /* @function boolean send_sms_by_api(string $mobile, string $message, array $config)
  * Send SMS trough an API
  * @param mobile mobile number
@@ -54,7 +50,7 @@ function send_sms_by_api($mobile, $message, $config) {
     $applicationSecret=$config['appsecret'];
     $consumer_key=$config['consumerkey'];
     // print_r($config);
-    $Sms = new SmsApi( $applicationKey,
+    $Sms = new \Ovh\Sms\SmsApi( $applicationKey,
                        $applicationSecret,
                        $endpoint,
                        $consumer_key );
