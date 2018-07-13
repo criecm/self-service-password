@@ -78,6 +78,7 @@ $shadow_options['shadow_expire_days'] = -1;
 # CRYPT
 # clear (the default)
 # auto (will check the hash of current password)
+# exop: will use LDAP extended operation to change password (PHP 7.2+)
 # This option is not used with ad_mode = true
 $hash = "clear";
 

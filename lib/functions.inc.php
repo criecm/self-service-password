@@ -356,7 +356,9 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
             $userdata["pwdLastSet"] = 0;
         }
     } else {
-        $userdata["userPassword"] = $password;
+	if ( $hash !== "exop" ) {
+            $userdata["userPassword"] = $password;
+        }
     }
 
     # Shadow options
@@ -397,7 +399,13 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
         $bmod = ldap_modify_batch($ldap, $dn, $modifications);
     } else {
         # Else just replace with new password
-        $replace = ldap_mod_replace($ldap, $dn, $userdata);
+	# use exop if selected and available
+	if (function_exists('ldap_exop_passwd') && $hash === "exop") {
+	    $replace = ldap_exop_passwd($ldap, $dn, $oldpassword, $password);
+        }
+	if ($replace) {
+            $replace = ldap_mod_replace($ldap, $dn, $userdata);
+	}
     }
 
     $errno = ldap_errno($ldap);
