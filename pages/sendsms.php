@@ -180,6 +180,11 @@ if ( $result === "" ) {
         $result = "smsnonumber";
         error_log("No SMS number found for user $login");
     } else {
+        if ( $use_ratelimit ) {
+            if ( ! allowed_rate($login,$rrl_config) ) {
+                $result = "smsnonumber";
+                error_log("LDAP - User $login too fast");
+            }
         $displayname = ldap_get_values($ldap, $entry, $ldap_fullname_attribute);
         $encrypted_sms_login = encrypt("$sms:$login", $keyphrase);
         $result = "smsuserfound";
