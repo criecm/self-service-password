@@ -86,6 +86,17 @@ $hash = "clear";
 $hash_options['crypt_salt_prefix'] = "$6$";
 $hash_options['crypt_salt_length'] = "6";
 
+# USE rate-limiting by IP and/or by user 
+$use_ratelimit = true;
+# dir for json db's (system default tmpdir)
+#$ratelimit_dbdir = '/tmp';
+# block attempts for same login ?
+$max_attempts_per_user = 2;
+# block attempts for same IP ?
+$max_attempts_per_ip = 2;
+# how many time to refuse subsequent requests ?
+$max_attempts_block_seconds = "3600";
+
 # Local password policy
 # This is applied before directory password policy
 # Minimal length
