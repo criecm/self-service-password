@@ -184,7 +184,9 @@ if ( $result === "" ) {
             if ( ! allowed_rate($login,$rrl_config) ) {
                 $result = "smsnonumber";
                 error_log("LDAP - User $login too fast");
+		throw new Exception('throttle');
             }
+        }
         $displayname = ldap_get_values($ldap, $entry, $ldap_fullname_attribute);
         $encrypted_sms_login = encrypt("$sms:$login", $keyphrase);
         $result = "smsuserfound";
