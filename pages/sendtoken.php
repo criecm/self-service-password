@@ -141,6 +141,7 @@ if ( $result === "" ) {
         if ( ! allowed_rate($login,$rrl_config) ) {
             $result = "mailnomatch";
             error_log("Mail - User $login too fast");
+            throw new Exception('throttle');
         }
     }
 
