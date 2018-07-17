@@ -572,7 +572,7 @@ function check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $resp
  * Check if this login / this IP reached the limit fixed
  * @return bool allowed
  */
-function allowed_rate($login,$rrl_config) {
+function allowed_rate($login,$ip_addr,$rrl_config) {
     $now = time();
     $fblock=1;
     if ($rrl_config["max_per_user"] > 0) {
@@ -580,8 +580,9 @@ function allowed_rate($login,$rrl_config) {
         if (!file_exists($rrludb)) {
 	    file_put_contents($rrludb,"{}");
 	}
-        $h = fopen($rrludb . ".lock","w") or die("Write $rrludb.lock failed");
-        flock($h,LOCK_EX,$fblock);
+        $dbfh = fopen($rrludb . ".lock","w");
+        if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
+        flock($dbfh,LOCK_EX,$fblock);
         $users = (array) json_decode(file_get_contents($rrludb));
         $atts = [$now];
         if (array_key_exists($login,$users)) {
@@ -592,32 +593,32 @@ function allowed_rate($login,$rrl_config) {
             }
         }
         $users[$login] = $atts;
-        file_put_contents($rrludb,json_encode($users)) or die("Write to $rrludb failed ?!?");
-        flock($h,LOCK_UN);
+        file_put_contents($rrludb,json_encode($users));
+        flock($dbfh,LOCK_UN);
         if (count($atts) > $rrl_config["max_per_user"]) {
             return false;
         }
     }
     if ($rrl_config["max_per_ip"] > 0) {
-        $ip = $_SERVER['REMOTE_ADDR'];
         $rrlidb = $rrl_config["dbdir"] . "/ssp_rrl_ips.json";
         if (!file_exists($rrlidb)) {
 	    file_put_contents($rrlidb,"{}");
         }
-	$h = fopen($rrlidb . ".lock","w") or die("Write $rrlidb failed");
-        flock($h,LOCK_EX,$fblock);
+        $dbfh = fopen($rrlidb . ".lock","w");
+        if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
+        flock($dbfh,LOCK_EX,$fblock);
         $ips = (array) json_decode(file_get_contents($rrlidb));
         $atts = [$now];
-        if (array_key_exists($ip,$ips)) {
-            foreach ($ips[$ip] as $when) {
+        if (array_key_exists($ip_addr,$ips)) {
+            foreach ($ips[$ip_addr] as $when) {
                 if ( $when > ($now - $rrl_config['per_time']) ) {
                     array_push($atts,$when);
                 }
             }
         }
-        $ips[$ip] = $atts;
-	file_put_contents($rrlidb,json_encode($ips)) or die("Write to $rrlidb failed");
-        flock($h,LOCK_UN);
+        $ips[$ip_addr] = $atts;
+	file_put_contents($rrlidb,json_encode($ips));
+        flock($dbfh,LOCK_UN);
         if (count($atts) > $rrl_config["max_per_ip"]) {
             return false;
         }
