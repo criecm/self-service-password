@@ -571,9 +571,9 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
         if (!file_exists($rrludb)) {
 	    file_put_contents($rrludb,"{}");
 	}
-        $h = fopen($rrludb . ".lock","w");
-        if (!$h) { throw new Exception('nowrite to '.$rrludb); }
-        flock($h,LOCK_EX,$fblock);
+        $dbfh = fopen($rrludb . ".lock","w");
+        if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
+        flock($dbfh,LOCK_EX,$fblock);
         $users = (array) json_decode(file_get_contents($rrludb));
         $atts = [$now];
         if (array_key_exists($login,$users)) {
@@ -585,7 +585,7 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
         }
         $users[$login] = $atts;
         file_put_contents($rrludb,json_encode($users));
-        flock($h,LOCK_UN);
+        flock($dbfh,LOCK_UN);
         if (count($atts) > $rrl_config["max_per_user"]) {
             return false;
         }
@@ -595,9 +595,9 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
         if (!file_exists($rrlidb)) {
 	    file_put_contents($rrlidb,"{}");
         }
-        $h = fopen($rrlidb . ".lock","w");
-        if (!$h) { throw new Exception('nowrite to '.$rrludb); }
-        flock($h,LOCK_EX,$fblock);
+        $dbfh = fopen($rrlidb . ".lock","w");
+        if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
+        flock($dbfh,LOCK_EX,$fblock);
         $ips = (array) json_decode(file_get_contents($rrlidb));
         $atts = [$now];
         if (array_key_exists($ip_addr,$ips)) {
@@ -609,7 +609,7 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
         }
         $ips[$ip_addr] = $atts;
 	file_put_contents($rrlidb,json_encode($ips));
-        flock($h,LOCK_UN);
+        flock($dbfh,LOCK_UN);
         if (count($atts) > $rrl_config["max_per_ip"]) {
             return false;
         }
