@@ -183,8 +183,8 @@ $mailer->Timeout       = $mail_smtp_timeout;
     <link rel="stylesheet" type="text/css" href="css/bootstrap-theme.min.css" />
     <link rel="stylesheet" type="text/css" href="css/font-awesome.min.css" />
     <link rel="stylesheet" type="text/css" href="css/self-service-password.css" />
-    <link href="images/favicon.ico" rel="icon" type="image/x-icon" />
-    <link href="images/favicon.ico" rel="shortcut icon" />
+    <link href="images/favicon.png" rel="icon" type="image/x-icon" />
+    <link href="images/favicon.png" rel="shortcut icon" />
 <?php if (isset($background_image)) { ?>
      <style>
        html, body {
