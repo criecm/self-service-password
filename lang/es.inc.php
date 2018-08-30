@@ -133,4 +133,3 @@ $messages['sshkeyerror'] = "La clave SSH fue rechazada por el directorio LDAP";
 $messages['pwned'] = "Su contraseña ha sido publicada en listas de contraseñas publicas, por lo cual ha sido rechazada, deberia considerar cambiarla en cualquer otro sitio que la haya usado";
 $messages['policypwned'] = "Su contraseña no puede haber sido publicada previamente en ninguna lista de contraseñas filtradas accesible al publico de ningun sitio";
 $messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";
-$messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";
