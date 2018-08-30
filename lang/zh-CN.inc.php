@@ -131,3 +131,5 @@ $messages['sameaslogin'] = "您的新密码与您的用户名相同";
 $messages['policydifflogin'] = "您的新密码不能与您的用户名相同";
 $messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
 $messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";
+$messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";
+$messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";

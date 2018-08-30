@@ -131,3 +131,4 @@ $messages['changesshkeyhelp'] = "Digite sua senha e a nova chave SSH.";
 $messages['sshkeyerror'] = "A chave SSH foi recusada pelo diretório LDAP";
 $messages['pwned'] = "Sua nova senha já foi publicada como vazada, você deveria alterá-la em qualquer outro site que a utilize.";
 $messages['policypwned'] = "Parece que sua nova senha não foi publicada como vazada de qualquer site";
+$messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";
