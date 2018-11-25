@@ -321,7 +321,7 @@ if ( $result === "redirect" ) {
 #==============================================================================
 # HTML
 #==============================================================================
-if ( in_array($result, $obscure_failure_messages) ) { $result = "badcredentials"; }
+if ( in_array($result, array($obscure_failure_messages)) ) { $result = "badcredentials"; }
 ?>
 
 <div class="result alert alert-<?php echo get_criticity($result) ?>">
@@ -406,7 +406,7 @@ if ( $show_help ) {
         <div class="col-sm-8">
             <div class="input-group">
                 <span class="input-group-addon"><i class="fa fa-fw fa-user"></i></span>
-                <input type="text" name="login" id="login" value="<?php echo htmlentities($login) ?>" class="form-control" placeholder="<?php echo $messages["login"]; ?>" />
+                <input type="text" name="login" id="login" value="<?php echo htmlentities($login) ?>" class="form-control" placeholder="<?php echo $messages["login"]; ?>" autocomplete="off" />
             </div>
         </div>
     </div>
