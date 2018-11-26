@@ -219,7 +219,7 @@ if ( $result === "sendsms" ) {
             $token  = encrypt(session_id(), $keyphrase);
             $result = "smssent";
             if ( !empty($reset_request_log) ) {
-                error_log("Send SMS code $smstoken by $sms_method to $sms\n\n", 3, $reset_request_log);
+                error_log(date('x')." Send SMS code $smstoken for $login by $sms_method to $sms\n", 3, $reset_request_log);
             } else {
                 error_log("Send SMS code $smstoken by $sms_method to $sms");
             }
@@ -242,7 +242,7 @@ if ( $result === "sendsms" ) {
                 $token  = encrypt(session_id(), $keyphrase);
                 $result = "smssent";
                 if ( !empty($reset_request_log) ) {
-                    error_log("Send SMS code $smstoken by $sms_method to $sms\n\n", 3, $reset_request_log);
+                    error_log(date('x')." Send SMS code $smstoken for $login by $sms_method to $sms\n", 3, $reset_request_log);
                 } else {
                     error_log("Send SMS code $smstoken by $sms_method to $sms");
                 }
@@ -302,7 +302,7 @@ if ( $result === "redirect" ) {
     $reset_url .= "?action=resetbytoken&source=sms&token=".urlencode($token);
 
     if ( !empty($reset_request_log) ) {
-        error_log("Send reset URL $reset_url \n\n", 3, $reset_request_log);
+        error_log(date('c')." Send reset URL $reset_url \n", 3, $reset_request_log);
     } else {
         error_log("Send reset URL $reset_url");
     }

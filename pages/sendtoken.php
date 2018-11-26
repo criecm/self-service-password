@@ -190,7 +190,7 @@ if ( $result === "" ) {
     $reset_url .= "?action=resetbytoken&token=".urlencode($token);
 
     if ( !empty($reset_request_log) ) {
-        error_log("Send reset URL $reset_url \n\n", 3, $reset_request_log);
+        error_log(date('c')." Send reset URL for $login : $reset_url\n", 3, $reset_request_log);
     } else {
         error_log("Send reset URL $reset_url");
     }
