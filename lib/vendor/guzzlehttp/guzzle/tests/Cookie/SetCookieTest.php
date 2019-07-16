@@ -1,13 +1,13 @@
 <?php
-
 namespace GuzzleHttp\Tests\CookieJar;
 
 use GuzzleHttp\Cookie\SetCookie;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers GuzzleHttp\Cookie\SetCookie
  */
-class SetCookieTest extends \PHPUnit_Framework_TestCase
+class SetCookieTest extends TestCase
 {
     public function testInitializesDefaultValues()
     {
@@ -116,17 +116,40 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
 
         $cookie->setDomain('.local');
         $this->assertTrue($cookie->matchesDomain('example.local'));
+
+        $cookie->setDomain('example.com/'); // malformed domain
+        $this->assertFalse($cookie->matchesDomain('example.com'));
     }
 
-    public function testMatchesPath()
+    public function pathMatchProvider()
+    {
+        return [
+            ['/foo', '/foo', true],
+            ['/foo', '/Foo', false],
+            ['/foo', '/fo', false],
+            ['/foo', '/foo/bar', true],
+            ['/foo', '/foo/bar/baz', true],
+            ['/foo', '/foo/bar//baz', true],
+            ['/foo', '/foobar', false],
+            ['/foo/bar', '/foo', false],
+            ['/foo/bar', '/foobar', false],
+            ['/foo/bar', '/foo/bar', true],
+            ['/foo/bar', '/foo/bar/', true],
+            ['/foo/bar', '/foo/bar/baz', true],
+            ['/foo/bar/', '/foo/bar', false],
+            ['/foo/bar/', '/foo/bar/', true],
+            ['/foo/bar/', '/foo/bar/baz', true],
+        ];
+    }
+
+    /**
+     * @dataProvider pathMatchProvider
+     */
+    public function testMatchesPath($cookiePath, $requestPath, $isMatch)
     {
         $cookie = new SetCookie();
-        $this->assertTrue($cookie->matchesPath('/foo'));
-
-        $cookie->setPath('/foo');
-        $this->assertTrue($cookie->matchesPath('/foo'));
-        $this->assertTrue($cookie->matchesPath('/foo/bar'));
-        $this->assertFalse($cookie->matchesPath('/bar'));
+        $cookie->setPath($cookiePath);
+        $this->assertEquals($isMatch, $cookie->matchesPath($requestPath));
     }
 
     public function cookieValidateProvider()
@@ -134,10 +157,11 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
         return array(
             array('foo', 'baz', 'bar', true),
             array('0', '0', '0', true),
+            array('foo[bar]', 'baz', 'bar', true),
             array('', 'baz', 'bar', 'The cookie name must not be empty'),
             array('foo', '', 'bar', 'The cookie value must not be empty'),
             array('foo', 'baz', '', 'The cookie domain must not be empty'),
-            array("foo\r", 'baz', '0', 'Cookie name must not cannot invalid characters: =,; \t\r\n\013\014'),
+            array("foo\r", 'baz', '0', 'Cookie name must not contain invalid characters: ASCII Control characters (0-31;127), space, tab and the following characters: ()<>@,;:\"/?={}'),
         );
     }
 
@@ -187,15 +211,15 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
     {
         return array(
             array(
-                'ASIHTTPRequestTestCookie=This+is+the+value; expires=Sat, 26-Jul-2008 17:00:42 GMT; path=/tests; domain=allseeing-i.com; PHPSESSID=6c951590e7a9359bcedde25cda73e43c; path=/";',
+                'ASIHTTPRequestTestCookie=This+is+the+value; expires=Sat, 26-Jul-2008 17:00:42 GMT; path=/tests; domain=allseeing-i.com; PHPSESSID=6c951590e7a9359bcedde25cda73e43c; path=/;',
                 array(
                     'Domain' => 'allseeing-i.com',
                     'Path' => '/',
                     'PHPSESSID' => '6c951590e7a9359bcedde25cda73e43c',
-                    'Max-Age' => NULL,
+                    'Max-Age' => null,
                     'Expires' => 'Sat, 26-Jul-2008 17:00:42 GMT',
-                    'Secure' => NULL,
-                    'Discard' => NULL,
+                    'Secure' => null,
+                    'Discard' => null,
                     'Name' => 'ASIHTTPRequestTestCookie',
                     'Value' => 'This+is+the+value',
                     'HttpOnly' => false
@@ -203,6 +227,21 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
             ),
             array('', []),
             array('foo', []),
+            array('; foo', []),
+            array(
+                'foo="bar"',
+                [
+                    'Name' => 'foo',
+                    'Value' => '"bar"',
+                    'Discard' => null,
+                    'Domain' => null,
+                    'Expires' => null,
+                    'Max-Age' => null,
+                    'Path' => '/',
+                    'Secure' => null,
+                    'HttpOnly' => false
+                ]
+            ),
             // Test setting a blank value for a cookie
             array(array(
                 'foo=', 'foo =', 'foo =;', 'foo= ;', 'foo =', 'foo= '),
@@ -220,7 +259,7 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
             ),
             // Test setting a value and removing quotes
             array(array(
-                'foo=1', 'foo =1', 'foo =1;', 'foo=1 ;', 'foo =1', 'foo= 1', 'foo = 1 ;', 'foo="1"', 'foo="1";', 'foo= "1";'),
+                'foo=1', 'foo =1', 'foo =1;', 'foo=1 ;', 'foo =1', 'foo= 1', 'foo = 1 ;'),
                 array(
                     'Name' => 'foo',
                     'Value' => '1',
@@ -360,5 +399,47 @@ class SetCookieTest extends \PHPUnit_Framework_TestCase
                 ], $p);
             }
         }
+    }
+
+    /**
+     * Provides the data for testing isExpired
+     *
+     * @return array
+     */
+    public function isExpiredProvider()
+    {
+        return array(
+            array(
+                'FOO=bar; expires=Thu, 01 Jan 1970 00:00:00 GMT;',
+                true,
+            ),
+            array(
+                'FOO=bar; expires=Thu, 01 Jan 1970 00:00:01 GMT;',
+                true,
+            ),
+            array(
+                'FOO=bar; expires='.date(\DateTime::RFC1123, time()+10).';',
+                false,
+            ),
+            array(
+                'FOO=bar; expires='.date(\DateTime::RFC1123, time()-10).';',
+                true,
+            ),
+            array(
+                'FOO=bar;',
+                false,
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider isExpiredProvider
+     */
+    public function testIsExpired($cookie, $expired)
+    {
+        $this->assertEquals(
+            $expired,
+            SetCookie::fromString($cookie)->isExpired()
+        );
     }
 }

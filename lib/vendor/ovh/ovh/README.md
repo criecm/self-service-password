@@ -16,7 +16,7 @@ use \Ovh\Api;
 
 $ovh = new Api( $applicationKey,
                 $applicationSecret,
-                $endpoint_name,
+                $endpoint,
                 $consumer_key);
 echo "Welcome " . $ovh->get('/me')['firstname'];
 ?>
@@ -47,6 +47,11 @@ Then, you can install OVH APIs wrapper and dependencies with:
 
 This will install ``ovh/ovh`` to ``./vendor``, along with other dependencies
 including ``autoload.php``.
+
+OVH cookbook
+------------
+
+Do you want to use OVH APIs? Maybe the script you want is already written in the [example part](examples/README.md) of this repository!
 
 How to login as a user?
 -----------------------
@@ -197,6 +202,7 @@ Supported APIs
 
 ## OVH Europe
 
+ * ```$endpoint = 'ovh-eu';```
  * Documentation: https://eu.api.ovh.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://eu.api.ovh.com/console
@@ -205,6 +211,7 @@ Supported APIs
 
 ## OVH North America
 
+ * ```$endpoint = 'ovh-ca';```
  * Documentation: https://ca.api.ovh.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://ca.api.ovh.com/console
@@ -213,6 +220,7 @@ Supported APIs
 
 ## So you Start Europe
 
+ * ```$endpoint = 'soyoustart-eu';```
  * Documentation: https://eu.api.soyoustart.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://eu.api.soyoustart.com/console/
@@ -221,6 +229,7 @@ Supported APIs
 
 ## So you Start North America
 
+ * ```$endpoint = 'soyoustart-ca';```
  * Documentation: https://ca.api.soyoustart.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://ca.api.soyoustart.com/console/
@@ -229,6 +238,7 @@ Supported APIs
 
 ## Kimsufi Europe
 
+ * ```$endpoint = 'kimsufi-eu';```
  * Documentation: https://eu.api.kimsufi.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://eu.api.kimsufi.com/console/
@@ -237,6 +247,7 @@ Supported APIs
 
 ## Kimsufi North America
 
+ * ```$endpoint = 'kimsufi-ca';```
  * Documentation: https://ca.api.kimsufi.com/
  * Community support: api-subscribe@ml.ovh.net
  * Console: https://ca.api.kimsufi.com/console/
@@ -245,6 +256,7 @@ Supported APIs
 
 ## Runabove
 
+ * ```$endpoint = 'runabove-ca';```
  * Documentation: https://community.runabove.com/kb/en/instances/how-to-use-runabove-api.html
  * Community support: https://community.runabove.com
  * Console: https://api.runabove.com/console/

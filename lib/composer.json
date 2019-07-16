@@ -1,10 +1,10 @@
 {
-    "name": "Self-Service-Password",
+    "name": "ltp/self-service-password",
     "description": "LDAP Tool Box Self Service Password",
     "require": {
         "ovh/php-ovh-sms": "dev-master",
-        "google/recaptcha": "~1.1",
-        "ron-maxweb/pwned-passwords": "^1.2",
+        "google/recaptcha": "~1.2",
+        "mxrxdxn/pwned-passwords": "^2.0",
         "phpmailer/phpmailer": "^6.0"
     }
 }

@@ -1,16 +1,16 @@
 <?php
-
 namespace GuzzleHttp\Tests\CookieJar;
 
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Cookie\SetCookie;
-use GuzzleHttp\Message\Request;
-use GuzzleHttp\Message\Response;
+use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @covers GuzzleHttp\Cookie\CookieJar
  */
-class CookieJarTest extends \PHPUnit_Framework_TestCase
+class CookieJarTest extends TestCase
 {
     /** @var CookieJar */
     private $jar;
@@ -29,12 +29,6 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
         ];
     }
 
-    public function testQuotesBadCookieValues()
-    {
-        $this->assertEquals('foo', CookieJar::getCookieValue('foo'));
-        $this->assertEquals('"foo,bar"', CookieJar::getCookieValue('foo,bar'));
-    }
-
     public function testCreatesFromArray()
     {
         $jar = CookieJar::fromArray([
@@ -42,6 +36,24 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
             'baz' => 'bam'
         ], 'example.com');
         $this->assertCount(2, $jar);
+    }
+
+    public function testEmptyJarIsCountable()
+    {
+        $this->assertCount(0, new CookieJar());
+    }
+
+    public function testGetsCookiesByName()
+    {
+        $cookies = $this->getTestCookies();
+        foreach ($this->getTestCookies() as $cookie) {
+            $this->jar->setCookie($cookie);
+        }
+
+        $testCookie = $cookies[0];
+        $this->assertEquals($testCookie, $this->jar->getCookieByName($testCookie->getName()));
+        $this->assertNull($this->jar->getCookieByName("doesnotexist"));
+        $this->assertNull($this->jar->getCookieByName(""));
     }
 
     /**
@@ -70,8 +82,8 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue($this->jar->setCookie($cookie));
         }
 
-        $this->assertEquals(3, count($this->jar));
-        $this->assertEquals(3, count($this->jar->getIterator()));
+        $this->assertCount(3, $this->jar);
+        $this->assertCount(3, $this->jar->getIterator());
         $this->assertEquals($cookies, $this->jar->getIterator()->getArrayCopy());
     }
 
@@ -96,23 +108,23 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
 
         // Remove foo.com cookies
         $this->jar->clear('foo.com');
-        $this->assertEquals(2, count($this->jar));
+        $this->assertCount(2, $this->jar);
         // Try again, removing no further cookies
         $this->jar->clear('foo.com');
-        $this->assertEquals(2, count($this->jar));
+        $this->assertCount(2, $this->jar);
 
         // Remove bar.com cookies with path of /boo
         $this->jar->clear('bar.com', '/boo');
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         // Remove cookie by name
         $this->jar->clear(null, null, 'test');
-        $this->assertEquals(0, count($this->jar));
+        $this->assertCount(0, $this->jar);
     }
 
     public function testDoesNotAddIncompleteCookies()
     {
-        $this->assertEquals(false, $this->jar->setCookie(new SetCookie()));
+        $this->assertFalse($this->jar->setCookie(new SetCookie()));
         $this->assertFalse($this->jar->setCookie(new SetCookie(array(
             'Name' => 'foo'
         ))));
@@ -128,8 +140,22 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
         ))));
     }
 
+    public function testDoesNotAddEmptyCookies()
+    {
+        $this->assertFalse($this->jar->setCookie(new SetCookie(array(
+            'Name'   => '',
+            'Domain' => 'foo.com',
+            'Value'  => 0
+        ))));
+    }
+
     public function testDoesAddValidCookies()
     {
+        $this->assertTrue($this->jar->setCookie(new SetCookie(array(
+            'Name'   => '0',
+            'Domain' => 'foo.com',
+            'Value'  => 0
+        ))));
         $this->assertTrue($this->jar->setCookie(new SetCookie(array(
             'Name'   => 'foo',
             'Domain' => 'foo.com',
@@ -163,23 +189,23 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
 
         // Make sure that the discard cookie is overridden with the non-discard
         $this->assertTrue($this->jar->setCookie(new SetCookie($data)));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         $data['Discard'] = false;
         $this->assertTrue($this->jar->setCookie(new SetCookie($data)));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         $c = $this->jar->getIterator()->getArrayCopy();
-        $this->assertEquals(false, $c[0]->getDiscard());
+        $this->assertFalse($c[0]->getDiscard());
 
         // Make sure it doesn't duplicate the cookie
         $this->jar->setCookie(new SetCookie($data));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         // Make sure the more future-ful expiration date supersede the other
         $data['Expires'] = time() + 2000;
         $this->assertTrue($this->jar->setCookie(new SetCookie($data)));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
         $c = $this->jar->getIterator()->getArrayCopy();
         $this->assertNotEquals($t, $c[0]->getExpires());
     }
@@ -203,13 +229,13 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
 
         $data['Value'] = 'boo';
         $this->assertTrue($this->jar->setCookie(new SetCookie($data)));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         // Changing the value plus a parameter also must overwrite the existing one
         $data['Value'] = 'zoo';
         $data['Secure'] = false;
         $this->assertTrue($this->jar->setCookie(new SetCookie($data)));
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
 
         $c = $this->jar->getIterator()->getArrayCopy();
         $this->assertEquals('zoo', $c[0]->getValue());
@@ -222,7 +248,7 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
         ));
         $request = new Request('GET', 'http://www.example.com');
         $this->jar->extractCookies($request, $response);
-        $this->assertEquals(1, count($this->jar));
+        $this->assertCount(1, $this->jar);
     }
 
     public function getMatchingCookiesDataProvider()
@@ -286,13 +312,13 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
         }
 
         $request = new Request('GET', $url);
-        $this->jar->addCookieHeader($request);
-        $this->assertEquals($cookies, $request->getHeader('Cookie'));
+        $request = $this->jar->withCookieHeader($request);
+        $this->assertEquals($cookies, $request->getHeaderLine('Cookie'));
     }
 
     /**
      * @expectedException \RuntimeException
-     * @expectedExceptionMessage Invalid cookie: Cookie name must not cannot invalid characters:
+     * @expectedExceptionMessage Invalid cookie: Cookie name must not contain invalid characters: ASCII Control characters (0-31;127), space, tab and the following characters: ()<>@,;:\"/?={}
      */
     public function testThrowsExceptionWithStrictMode()
     {
@@ -335,5 +361,46 @@ class CookieJarTest extends \PHPUnit_Framework_TestCase
         $newCookieJar = new CookieJar(false, $arr);
         $this->assertCount(3, $newCookieJar);
         $this->assertSame($jar->toArray(), $newCookieJar->toArray());
+    }
+
+    public function testAddsCookiesWithEmptyPathFromResponse()
+    {
+        $response = new Response(200, array(
+            'Set-Cookie' => "fpc=foobar; expires=Fri, 02-Mar-2019 02:17:40 GMT; path=;"
+        ));
+        $request = new Request('GET', 'http://www.example.com');
+        $this->jar->extractCookies($request, $response);
+        $newRequest = $this->jar->withCookieHeader(new Request('GET', 'http://www.example.com/foo'));
+        $this->assertTrue($newRequest->hasHeader('Cookie'));
+    }
+
+    public function getCookiePathsDataProvider()
+    {
+        return [
+            ['', '/'],
+            ['/', '/'],
+            ['/foo', '/'],
+            ['/foo/bar', '/foo'],
+            ['/foo/bar/', '/foo/bar'],
+            ['foo', '/'],
+            ['foo/bar', '/'],
+            ['foo/bar/', '/'],
+        ];
+    }
+
+    /**
+     * @dataProvider getCookiePathsDataProvider
+     */
+    public function testCookiePathWithEmptySetCookiePath($uriPath, $cookiePath)
+    {
+        $response = (new Response(200))
+            ->withAddedHeader('Set-Cookie', "foo=bar; expires=Fri, 02-Mar-2019 02:17:40 GMT; domain=www.example.com; path=;")
+            ->withAddedHeader('Set-Cookie', "bar=foo; expires=Fri, 02-Mar-2019 02:17:40 GMT; domain=www.example.com; path=foobar;")
+        ;
+        $request = (new Request('GET', $uriPath))->withHeader('Host', 'www.example.com');
+        $this->jar->extractCookies($request, $response);
+
+        $this->assertEquals($cookiePath, $this->jar->toArray()[0]['Path']);
+        $this->assertEquals($cookiePath, $this->jar->toArray()[1]['Path']);
     }
 }

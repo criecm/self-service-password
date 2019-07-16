@@ -1,41 +1,40 @@
 language: php
 
+sudo: false
+
 php:
-  - 5.4
   - 5.5
   - 5.6
   - 7.0
-  - hhvm
-
-env:
-  global:
-    - TEST_COMMAND="composer test"
+  - 7.1
+  - 7.2
+  - nightly
 
 before_script:
   - curl --version
-  - pear config-set php_ini ~/.phpenv/versions/`php -r 'echo phpversion();'`/etc/php.ini || echo 'Error modifying PEAR'
-  - pecl install uri_template || echo 'Error installing uri_template'
-  # To be removed when this issue will be resolved: https://github.com/composer/composer/issues/5355
-  - if [[ "$COMPOSER_FLAGS" == *"--prefer-lowest"* ]]; then travis_retry composer update --prefer-dist --no-interaction --prefer-stable --quiet; fi
-  - travis_retry composer update ${COMPOSER_FLAGS} --prefer-dist --no-interaction
+  - composer install --no-interaction --prefer-source --dev
   - ~/.nvm/nvm.sh install v0.6.14
   - ~/.nvm/nvm.sh run v0.6.14
+  - if [[ "$TRAVIS_PHP_VERSION" != "7.0" || "$TRAVIS_PHP_VERSION" != "7.1" ]]; then echo "xdebug.overload_var_dump = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini || true; fi
 
-script: $TEST_COMMAND
+script: make test
 
 matrix:
   allow_failures:
     - php: hhvm
+      dist: trusty
+    - php: nightly
+  include: 
+    - php: hhvm
+      dist: trusty
   fast_finish: true
-  include:
-    - php: 5.4
-      env: COMPOSER_FLAGS="--prefer-stable --prefer-lowest" COVERAGE=true TEST_COMMAND="composer test-ci"
 
 before_deploy:
   - make package
 
 deploy:
   provider: releases
+  skip_cleanup: true
   api_key:
     secure: UpypqlYgsU68QT/x40YzhHXvzWjFwCNo9d+G8KAdm7U9+blFfcWhV1aMdzugvPMl6woXgvJj7qHq5tAL4v6oswCORhpSBfLgOQVFaica5LiHsvWlAedOhxGmnJqMTwuepjBCxXhs3+I8Kof1n4oUL9gKytXjOVCX/f7XU1HiinU=
   file:
@@ -45,4 +44,4 @@ deploy:
     repo: guzzle/guzzle
     tags: true
     all_branches: true
-    php: 5.4
+    php: 5.5

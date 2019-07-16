@@ -578,7 +578,7 @@ class SmsApi
             throw new \Ovh\Exceptions\InvalidParameterException("Sender parameter is empty");
         }
 
-        return $this->conn->get("/sms/".$this->account."/senders/$sender");
+        return $this->conn->get("/sms/".$this->account."/senders/".rawurlencode($sender));
     }
 
     /**
