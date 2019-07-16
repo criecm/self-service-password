@@ -134,3 +134,5 @@ $messages['changesshkeysubject'] = "Ihr SSH-Schlüssel wurde geändert";
 $messages['pwned'] = "Your new password has already been published on leaks, you should consider changing it on any other service that it is in use";
 $messages['policypwned'] = "Your new password may not be published on any previous public password leak from any site";
 $messages['throttle'] = "Too fast !!! Please try again later (if ever you are human)";
+$messages['specialatends'] = "Ihr Passwort enthält das einzige Sonderzeichen am Anfang oder am Ende";
+$messages['policyspecialatends'] = "Ein Sonderzeichen, wenn es nur ein einziges gibt, darf nicht am Anfang oder am Ende stehen";

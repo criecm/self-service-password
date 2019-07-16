@@ -145,7 +145,7 @@ function generate_sms_token( $sms_token_length ) {
 # Get message criticity
 function get_criticity( $msg ) {
 
-    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|nokeyphrase|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin|pwned|sshkeyerror/" , $msg ) ) {
+    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|nokeyphrase|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin|pwned|sshkeyerror|specialatends/" , $msg ) ) {
     return "danger";
     }
 
@@ -175,7 +175,7 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
     # Should we display it?
     if ( !$pwd_show_policy or $pwd_show_policy === "never" ) { return; }
     if ( $pwd_show_policy === "onerror" ) {
-        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin|pwned/" , $result) ) { return; }
+        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin|pwned|specialatends/" , $result) ) { return; }
     }
 
     # Display bloc
@@ -193,6 +193,7 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
     if ( $pwd_no_reuse        ) { echo "<li>".$messages["policynoreuse"]                                 ."\n"; }
     if ( $pwd_diff_login      ) { echo "<li>".$messages["policydifflogin"]                               ."\n"; }
     if ( $use_pwnedpasswords  ) { echo "<li>".$messages["policypwned"]                               ."\n"; }
+    if ( $pwd_no_special_at_ends  ) { echo "<li>".$messages["policyspecialatends"] ."</li>\n"; }
     echo "</ul>\n";
     echo "</div>\n";
 }
@@ -213,9 +214,13 @@ function check_password_strength( $password, $oldpassword, $pwd_policy_config, $
     $digit = count( $digit_res[0] );
 
     $special = 0;
+    $special_at_ends = false;
     if ( isset($pwd_special_chars) && !empty($pwd_special_chars) ) {
         preg_match_all("/[$pwd_special_chars]/", $password, $special_res);
         $special = count( $special_res[0] );
+        if ( $pwd_no_special_at_ends ) {
+          $special_at_ends = preg_match("/(^[$pwd_special_chars]|[$pwd_special_chars]$)/", $password, $special_res);
+        }
     }
 
     $forbidden = 0;
@@ -254,6 +259,9 @@ function check_password_strength( $password, $oldpassword, $pwd_policy_config, $
 
     # Forbidden chars
     if ( $forbidden > 0 ) { $result="forbiddenchars"; }
+
+    # Special chars at beginning or end
+    if ( $special_at_ends > 0 && $special == 1 ) { $result="specialatends"; }
 
     # Same as old password?
     if ( $pwd_no_reuse and $password === $oldpassword ) { $result="sameasold"; }
@@ -626,3 +634,31 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
     return true;
 }
 
+/* @function string posthook_command(string $posthook, string  $login, string $newpassword, null|string $oldpassword, null|boolean $posthook_password_encodebase64)
+   Creates the command line to execute for the posthook process. Passwords will be base64 encoded if configured. Base64 encoding will prevent passwords with special 
+   characters to be modified by the escapeshellarg() function.
+   @param $postkook string script/command to execute for procesing posthook data
+   @param $login string username to change/set password for
+   @param $newpassword string new passwword for given login
+   @param $oldpassword string old password for given login
+   @param posthook_password_encodebase64 boolean set to true if passwords are to be converted to base64 encoded strings
+*/
+function posthook_command($posthook, $login, $newpassword, $oldpassword = null, $posthook_password_encodebase64 = false) {
+
+	$command = '';
+	if ( isset($posthook_password_encodebase64) && $posthook_password_encodebase64 ) {
+		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.base64_encode($newpassword);
+
+		if ( ! is_null($oldpassword) ) {
+			$command .= ' '.base64_encode($oldpassword);		
+		}
+
+	} else {		
+		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);		
+
+		if ( ! is_null($oldpassword) ) {
+			$command .= ' '.escapeshellarg($oldpassword);		
+		}
+	}
+	return $command;
+}
