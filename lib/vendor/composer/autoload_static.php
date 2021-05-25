@@ -4,94 +4,43 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInite1d9a805922b926f290184ef416fec39
+class ComposerStaticInitf77fc8f34cb7bd900df003a30d1661da
 {
-    public static $files = array (
-        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
-        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-    );
-
     public static $prefixLengthsPsr4 = array (
-        'R' => 
+        'S' => 
         array (
-            'ReCaptcha\\' => 10,
+            'Symfony\\Component\\Finder\\' => 25,
         ),
         'P' => 
         array (
-            'PwnedPasswords\\' => 15,
-            'Psr\\Http\\Message\\' => 17,
             'PHPMailer\\PHPMailer\\' => 20,
-        ),
-        'O' => 
-        array (
-            'Ovh\\Sms\\' => 8,
-            'Ovh\\' => 4,
         ),
         'G' => 
         array (
-            'GuzzleHttp\\Psr7\\' => 16,
-            'GuzzleHttp\\Promise\\' => 19,
-            'GuzzleHttp\\' => 11,
+            'Gregwar\\' => 8,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'ReCaptcha\\' => 
+        'Symfony\\Component\\Finder\\' => 
         array (
-            0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
-        ),
-        'PwnedPasswords\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/mxrxdxn/pwned-passwords/src/PwnedPasswords',
-        ),
-        'Psr\\Http\\Message\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/psr/http-message/src',
+            0 => __DIR__ . '/..' . '/symfony/finder',
         ),
         'PHPMailer\\PHPMailer\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpmailer/phpmailer/src',
         ),
-        'Ovh\\Sms\\' => 
+        'Gregwar\\' => 
         array (
-            0 => __DIR__ . '/..' . '/ovh/php-ovh-sms/src',
-        ),
-        'Ovh\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/ovh/ovh/src',
-        ),
-        'GuzzleHttp\\Psr7\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/psr7/src',
-        ),
-        'GuzzleHttp\\Promise\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/promises/src',
-        ),
-        'GuzzleHttp\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/guzzlehttp/guzzle/src',
-        ),
-    );
-
-    public static $prefixesPsr0 = array (
-        'O' => 
-        array (
-            'Ovh\\Sms\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/ovh/php-ovh-sms/src',
-            ),
+            0 => __DIR__ . '/..' . '/gregwar/captcha/src/Gregwar',
         ),
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInite1d9a805922b926f290184ef416fec39::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInite1d9a805922b926f290184ef416fec39::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInite1d9a805922b926f290184ef416fec39::$prefixesPsr0;
+            $loader->prefixLengthsPsr4 = ComposerStaticInitf77fc8f34cb7bd900df003a30d1661da::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInitf77fc8f34cb7bd900df003a30d1661da::$prefixDirsPsr4;
 
         }, null, ClassLoader::class);
     }

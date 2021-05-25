@@ -6,13 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
-    'ReCaptcha\\' => array($vendorDir . '/google/recaptcha/src/ReCaptcha'),
-    'PwnedPasswords\\' => array($vendorDir . '/mxrxdxn/pwned-passwords/src/PwnedPasswords'),
-    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
+    'Symfony\\Component\\Finder\\' => array($vendorDir . '/symfony/finder'),
     'PHPMailer\\PHPMailer\\' => array($vendorDir . '/phpmailer/phpmailer/src'),
-    'Ovh\\Sms\\' => array($vendorDir . '/ovh/php-ovh-sms/src'),
-    'Ovh\\' => array($vendorDir . '/ovh/ovh/src'),
-    'GuzzleHttp\\Psr7\\' => array($vendorDir . '/guzzlehttp/psr7/src'),
-    'GuzzleHttp\\Promise\\' => array($vendorDir . '/guzzlehttp/promises/src'),
-    'GuzzleHttp\\' => array($vendorDir . '/guzzlehttp/guzzle/src'),
+    'Gregwar\\' => array($vendorDir . '/gregwar/captcha/src/Gregwar'),
 );

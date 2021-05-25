@@ -18,7 +18,6 @@
 # GPL License: http://www.gnu.org/licenses/gpl.txt
 #
 #==============================================================================
-require_once( __DIR__ . "/vendor/autoload.php");
 
 # Create SSHA password
 function make_ssha_password($password) {
@@ -95,9 +94,9 @@ function make_crypt_password($password, $hash_options) {
 
     // Generate salt
     $possible = '0123456789'.
-		'abcdefghijklmnopqrstuvwxyz'.
-		'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
-		'./';
+                'abcdefghijklmnopqrstuvwxyz'.
+                'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
+                './';
     $salt = "";
 
     while( strlen( $salt ) < $salt_length ) {
@@ -131,13 +130,13 @@ function make_ad_password($password) {
 
 # Generate SMS token
 function generate_sms_token( $sms_token_length ) {
-    $Range=explode(',','48-57');
-    $NumRanges=count($Range);
-    $smstoken='';
+    $Range = explode(',', '48-57');
+    $NumRanges = count($Range);
+    $smstoken = '';
     for ($i = 1; $i <= $sms_token_length; $i++){
-        $r=random_int(0,$NumRanges-1);
-        list($min,$max)=explode('-',$Range[$r]);
-        $smstoken.=chr(random_int($min,$max));
+        $r = random_int(0, $NumRanges-1);
+        list($min, $max) = explode('-', $Range[$r]);
+        $smstoken .= chr(random_int($min, $max));
     }
     return $smstoken;
 }
@@ -145,11 +144,11 @@ function generate_sms_token( $sms_token_length ) {
 # Get message criticity
 function get_criticity( $msg ) {
 
-    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|nokeyphrase|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin|pwned|sshkeyerror|specialatends/" , $msg ) ) {
+    if ( preg_match( "/nophpldap|phpupgraderequired|nophpmhash|nokeyphrase|ldaperror|nomatch|badcredentials|passworderror|tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|answermoderror|answernomatch|mailnomatch|tokennotsent|tokennotvalid|notcomplex|smsnonumber|smscrypttokensrequired|nophpmbstring|nophpxml|smsnotsent|sameaslogin|pwned|invalidsshkey|sshkeyerror|specialatends|forbiddenwords|forbiddenldapfields|diffminchars|badquality|tooyoung|inhistory|throttle/" , $msg ) ) {
     return "danger";
     }
 
-    if ( preg_match( "/(login|oldpassword|newpassword|confirmpassword|answer|question|password|mail|token|sshkey)required|badcaptcha|tokenattempts/" , $msg ) ) {
+    if ( preg_match( "/(login|oldpassword|newpassword|confirmpassword|answer|question|password|mail|token|sshkey|captcha)required|badcaptcha|tokenattempts|checkdatabeforesubmit/" , $msg ) ) {
         return "warning";
     }
 
@@ -175,7 +174,7 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
     # Should we display it?
     if ( !$pwd_show_policy or $pwd_show_policy === "never" ) { return; }
     if ( $pwd_show_policy === "onerror" ) {
-        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin|pwned|specialatends/" , $result) ) { return; }
+        if ( !preg_match( "/tooshort|toobig|minlower|minupper|mindigit|minspecial|forbiddenchars|sameasold|notcomplex|sameaslogin|pwned||specialatendsforbiddenwords|forbiddenldapfields/" , $result) ) { return; }
     }
 
     # Display bloc
@@ -190,17 +189,29 @@ function show_policy( $messages, $pwd_policy_config, $result ) {
     if ( $pwd_min_special     ) { echo "<li>".$messages["policyminspecial"]     ." $pwd_min_special</li>\n"; }
     if ( $pwd_complexity      ) { echo "<li>".$messages["policycomplex"]        ." $pwd_complexity</li>\n"; }
     if ( $pwd_forbidden_chars ) { echo "<li>".$messages["policyforbiddenchars"] ." $pwd_forbidden_chars</li>\n"; }
-    if ( $pwd_no_reuse        ) { echo "<li>".$messages["policynoreuse"]                                 ."\n"; }
-    if ( $pwd_diff_login      ) { echo "<li>".$messages["policydifflogin"]                               ."\n"; }
-    if ( $use_pwnedpasswords  ) { echo "<li>".$messages["policypwned"]                               ."\n"; }
+    if ( $pwd_no_reuse        ) { echo "<li>".$messages["policynoreuse"]                                 ."</li>\n"; }
+    if ( $pwd_diff_last_min_chars ) { echo "<li>".$messages['policydiffminchars']." $pwd_diff_last_min_chars</li>\n"; }
+    if ( $pwd_diff_login      ) { echo "<li>".$messages["policydifflogin"]                               ."</li>\n"; }
+    if ( $use_pwnedpasswords  ) { echo "<li>".$messages["policypwned"]                               ."</li>\n"; }
     if ( $pwd_no_special_at_ends  ) { echo "<li>".$messages["policyspecialatends"] ."</li>\n"; }
+    if ( !empty($pwd_forbidden_words)) { echo "<li>".$messages["policyforbiddenwords"] ." " . implode(', ', $pwd_forbidden_words) ."</li>\n"; }
+    if ( !empty($pwd_forbidden_ldap_fields)) {
+        $pwd_forbidden_ldap_fields = array_map(
+            function($field) use ($messages) {
+                if (empty($messages['ldap_' . $field])) {
+                    return $field;
+                }
+               return $messages['ldap_' . $field];
+            }, $pwd_forbidden_ldap_fields);
+        echo "<li>".$messages["policyforbiddenldapfields"] ." " . implode(', ', $pwd_forbidden_ldap_fields) ."</li>\n";
+    }
     echo "</ul>\n";
     echo "</div>\n";
 }
 
 # Check password strength
 # @return result code
-function check_password_strength( $password, $oldpassword, $pwd_policy_config, $login ) {
+function check_password_strength( $password, $oldpassword, $pwd_policy_config, $login, $entry ) {
     extract( $pwd_policy_config );
 
     $result = "";
@@ -219,7 +230,7 @@ function check_password_strength( $password, $oldpassword, $pwd_policy_config, $
         preg_match_all("/[$pwd_special_chars]/", $password, $special_res);
         $special = count( $special_res[0] );
         if ( $pwd_no_special_at_ends ) {
-          $special_at_ends = preg_match("/(^[$pwd_special_chars]|[$pwd_special_chars]$)/", $password, $special_res);
+            $special_at_ends = preg_match("/(^[$pwd_special_chars]|[$pwd_special_chars]$)/", $password, $special_res);
         }
     }
 
@@ -268,24 +279,61 @@ function check_password_strength( $password, $oldpassword, $pwd_policy_config, $
 
     # Same as login?
     if ( $pwd_diff_login and $password === $login ) { $result="sameaslogin"; }
-	
-	# pwned?
-	if ($use_pwnedpasswords) {
-		$pwned_passwords = new PwnedPasswords\PwnedPasswords;
-		
-		$insecure = $pwned_passwords->isInsecure($password);
-		
-		if($insecure) { $result="pwned"; }	
-	}
+
+    if ( $pwd_diff_last_min_chars > 0 and strlen($oldpassword) > 0 ) {
+        $similarities = similar_text($oldpassword, $password);
+        $check_len    = strlen($oldpassword) < strlen($password) ? strlen($oldpassword) : strlen($password);
+        $new_chars    = $check_len - $similarities;
+        if ($new_chars <= $pwd_diff_last_min_chars) { $result = "diffminchars"; }
+    }
+
+    # Contains forbidden words?
+    if ( !empty($pwd_forbidden_words) ) {
+        foreach( $pwd_forbidden_words as $disallowed ) {
+            if( stripos($password, $disallowed) !== false ) {
+                $result="forbiddenwords";
+                break;
+            }
+        }
+    }
+
+    # Contains values from forbidden ldap fields?
+    if ( !empty($pwd_forbidden_ldap_fields) ) {
+        foreach ( $pwd_forbidden_ldap_fields as $field ) {
+            $values = $entry[$field];
+            if (!is_array($entry[$field])) {
+                $values = array($entry[$field]);
+            }
+            foreach ($values as $key => $value) {
+                if ($key === 'count') {
+                    continue;
+                }
+                if (stripos($password, $value) !== false) {
+                    $result = "forbiddenldapfields";
+                    break 2;
+                }
+            }
+        }
+    }
+
+    # pwned?
+    if ($use_pwnedpasswords) {
+        $pwned_passwords = new PwnedPasswords\PwnedPasswords;
+        $insecure = $pwned_passwords->isInsecure($password);
+        if ($insecure) { $result="pwned"; }
+    }
 
     return $result;
 }
 
 # Change password
 # @return result code
-function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_mode, $samba_options, $shadow_options, $hash, $hash_options, $who_change_password, $oldpassword ) {
+function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_mode, $samba_options, $shadow_options, $hash, $hash_options, $who_change_password, $oldpassword, $use_exop_passwd, $use_ppolicy_control ) {
 
     $result = "";
+    $error_code = "";
+    $error_msg = "";
+    $ppolicy_error_code = "";
 
     $time = time();
 
@@ -299,6 +347,9 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
         if ( isset($samba_options['max_age']) && $samba_options['max_age'] > 0 ) {
              $userdata["sambaPwdMustChange"] = $time + ( $samba_options['max_age'] * 86400 );
         }
+        if ( isset($samba_options['expire_days']) && $samba_options['expire_days'] > 0 ) {
+             $userdata["sambaKickoffTime"] = $time + ( $samba_options['expire_days'] * 86400 );
+        }
     }
 
     # Get hash type if hash is set to auto
@@ -309,7 +360,7 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
             if ( isset($userpassword) ) {
                 if ( preg_match( '/^\{(\w+)\}/', $userpassword[0], $matches ) ) {
                     $hash = strtoupper($matches[1]);
-		}
+                }
             }
         }
     }
@@ -317,7 +368,7 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
     # Transform password value
     if ( $ad_mode ) {
         $password = make_ad_password($password);
-    } else {
+    } elseif (!$use_exop_passwd) {
         # Hash password if needed
         if ( $hash == "SSHA" ) {
             $password = make_ssha_password($password);
@@ -363,10 +414,6 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
         if ( $ad_options['force_pwd_change'] ) {
             $userdata["pwdLastSet"] = 0;
         }
-    } else {
-	if ( $hash !== "exop" ) {
-            $userdata["userPassword"] = $password;
-        }
     }
 
     # Shadow options
@@ -405,22 +452,69 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
         );
 
         $bmod = ldap_modify_batch($ldap, $dn, $modifications);
+        $error_code = ldap_errno($ldap);
+        $error_msg = ldap_error($ldap);
+    } elseif ($use_exop_passwd) {
+        $exop_passwd = FALSE;
+        if ( $use_ppolicy_control ) {
+            $ctrls = array();
+            $exop_passwd = ldap_exop_passwd($ldap, $dn, $oldpassword, $password, $ctrls);
+            $error_code = ldap_errno($ldap);
+            $error_msg = ldap_error($ldap);
+            if (!$exop_passwd) {
+                if (isset($ctrls[LDAP_CONTROL_PASSWORDPOLICYRESPONSE])) {
+                    $value = $ctrls[LDAP_CONTROL_PASSWORDPOLICYRESPONSE]['value'];
+                    if (isset($value['error'])) {
+                        $ppolicy_error_code = $value['error'];
+                        error_log("LDAP - Ppolicy error code: $ppolicy_error_code");
+                    }
+                }
+            }
+        } else {
+            $exop_passwd = ldap_exop_passwd($ldap, $dn, $oldpassword, $password);
+            $error_code = ldap_errno($ldap);
+            $error_msg = ldap_error($ldap);
+        }
+        if ($exop_passwd === TRUE) {
+            # If password change works update other data
+            if (!empty($userdata)) {
+                ldap_mod_replace($ldap, $dn, $userdata);
+                $error_code = ldap_errno($ldap);
+                $error_msg = ldap_error($ldap);
+            }
+        }
     } else {
         # Else just replace with new password
-	# use exop if selected and available
-	if (function_exists('ldap_exop_passwd') && $hash === "exop") {
-	    $replace = ldap_exop_passwd($ldap, $dn, $oldpassword, $password);
+        if (!$ad_mode) {
+            $userdata["userPassword"] = $password;
         }
-	if ($replace) {
-            $replace = ldap_mod_replace($ldap, $dn, $userdata);
-	}
+        if ( $use_ppolicy_control ) {
+            $ppolicy_replace = ldap_mod_replace_ext($ldap, $dn, $userdata, [['oid' => LDAP_CONTROL_PASSWORDPOLICYREQUEST]]);
+            if (ldap_parse_result($ldap, $ppolicy_replace, $error_code, $matcheddn, $error_msg, $referrals, $ctrls)) {
+                if (isset($ctrls[LDAP_CONTROL_PASSWORDPOLICYRESPONSE])) {
+                    $value = $ctrls[LDAP_CONTROL_PASSWORDPOLICYRESPONSE]['value'];
+                    if (isset($value['error'])) {
+                        $ppolicy_error_code = $value['error'];
+                        error_log("LDAP - Ppolicy error code: $ppolicy_error_code");
+                    }
+                }
+            }
+        } else {
+            ldap_mod_replace($ldap, $dn, $userdata);
+            $error_code = ldap_errno($ldap);
+            $error_msg = ldap_error($ldap);
+        }
     }
 
-    $errno = ldap_errno($ldap);
-
-    if ( $errno ) {
+    if ( !isset($error_code) ) {
+        $result = "ldaperror";
+    } elseif ( $error_code > 0 ) {
         $result = "passworderror";
-        error_log("LDAP - Modify password error $errno (".ldap_error($ldap).")");
+        error_log("LDAP - Modify password error $error_code ($error_msg)");
+        if ( $ppolicy_error_code === 5 ) { $result = "badquality"; }
+        if ( $ppolicy_error_code === 6 ) { $result = "tooshort"; }
+        if ( $ppolicy_error_code === 7 ) { $result = "tooyoung"; }
+        if ( $ppolicy_error_code === 8 ) { $result = "inhistory"; }
     } else {
         $result = "passwordchanged";
     }
@@ -428,6 +522,39 @@ function change_password( $ldap, $dn, $password, $ad_mode, $ad_options, $samba_m
     return $result;
 }
 
+
+# Verifies sshPublicKey is valid
+function check_sshkey ( $sshkey, $valid_types ) {
+    $key_parts = preg_split('/[\s]+/', $sshkey);
+
+    if (count($key_parts) < 2) {
+        return false;
+    }
+    if (count($key_parts) > 3) {
+        return false;
+    }
+
+    $algorithm = $key_parts[0];
+    if (count($valid_types) > 0) {
+        if (! in_array($algorithm, $valid_types)) {
+            return false;
+        }
+    }
+
+    $key = $key_parts[1];
+    $key_base64_decoded = base64_decode($key, true);
+    if ($key_base64_decoded == FALSE) {
+        return false;
+    }
+
+    $ealg = base64_encode($algorithm . " AAAA");
+    $check = preg_replace('/[\x00-\x1F\x7F]/u', '', base64_decode(substr($key, 0, strlen($ealg))));
+    if ((string) $check !== (string) $algorithm) {
+        return false;
+    }
+
+    return true;
+}
 
 # Change sshPublicKey attribute
 # @return result code
@@ -478,6 +605,31 @@ function decrypt($data, $keyphrase) {
     }
 }
 
+
+/* @function string str_putcsv(array $fields[, string $delimiter = ','[, string $enclosure = '"'[, string $escape_char = '\\']]])
+ * Convert array to CSV line. Based on https://gist.github.com/johanmeiring/2894568 and https://bugs.php.net/bug.php?id=64183#1506521511
+ * Wrapped in `if(!function_exists(...` in case it gets added to PHP.
+ * Also see https://www.php.net/manual/en/function.fgetcsv.php and related
+ * @param string $fields An array of strings
+ * @param string $delimiter field delimiter (one character only)
+ * @param string $enclosure field enclosure (one character only)
+ * @param string $escape_char escape character (at most one character) - empty string ("") disables escape mechanism
+ * @return string fields in CSV format
+ */
+if(!function_exists('str_putcsv'))
+{
+    function str_putcsv($fields, $delimiter = ',', $enclosure = '"', $escape_char = '\\')
+    {
+        $fp = fopen('php://temp', 'r+');
+        fputcsv($fp, $fields, $delimiter, $enclosure, $escape_char);
+        rewind($fp);
+        $data = stream_get_contents($fp);
+        fclose($fp);
+        return rtrim($data, "\n");
+    }
+}
+
+
 /* @function boolean send_mail(PHPMailer $mailer, string $mail, string $mail_from, string $subject, string $body, array $data)
  * Send a mail, replace strings in body
  * @param mailer PHPMailer object
@@ -492,7 +644,7 @@ function send_mail($mailer, $mail, $mail_from, $mail_from_name, $subject, $body,
 
     $result = false;
 
-    if($mailer instanceof PHPMailer) {
+    if (!is_a($mailer, 'PHPMailer\PHPMailer\PHPMailer')) {
         error_log("send_mail: PHPMailer object required!");
         return $result;
     }
@@ -503,7 +655,7 @@ function send_mail($mailer, $mail, $mail_from, $mail_from_name, $subject, $body,
     }
 
     /* Replace data in mail, subject and body */
-    foreach($data as $key => $value ) {
+    foreach ($data as $key => $value ) {
         $mail = str_replace('{'.$key.'}', $value, $mail);
         $mail_from = str_replace('{'.$key.'}', $value, $mail_from);
         $subject = str_replace('{'.$key.'}', $value, $subject);
@@ -541,8 +693,7 @@ function check_username_validity($username,$login_forbidden_chars) {
             $result = "badcredentials";
             error_log("Non alphanumeric characters in username $username");
         }
-    }
-    else {
+    } else {
         preg_match_all("/[$login_forbidden_chars]/", $username, $forbidden_res);
         if (count($forbidden_res[0])) {
             $result = "badcredentials";
@@ -553,30 +704,36 @@ function check_username_validity($username,$login_forbidden_chars) {
     return $result;
 }
 
-/* @function string check_recaptcha(string $recaptcha_privatekey, null|string $recaptcha_request_method, string $response, string $login)
- * Check if $response verifies the reCAPTCHA by asking the recaptcha server, logs if errors
- * @param $recaptcha_privatekey string shared secret with reCAPTCHA server
- * @param $recaptcha_request_method null|string FQCN of request method, null for default
- * @param $response string response provided by user
- * @param $login string for logging purposes only
- * @return string empty string if the response is verified successfully, else string 'badcaptcha'
- */
-function check_recaptcha($recaptcha_privatekey, $recaptcha_request_method, $response, $login) {
-    $recaptcha = new \ReCaptcha\ReCaptcha($recaptcha_privatekey, is_null($recaptcha_request_method) ? null : new $recaptcha_request_method());
-    $resp = $recaptcha->verify($response, $_SERVER['REMOTE_ADDR']);
+/* @function string hook_command(string $hook, string  $login, string $newpassword, null|string $oldpassword, null|boolean $hook_password_encodebase64)
+   Creates the command line to execute for the prehook/posthook process. Passwords will be base64 encoded if configured. Base64 encoding will prevent passwords with special
+   characters to be modified by the escapeshellarg() function.
+   @param $hook string script/command to execute for procesing hook data
+   @param $login string username to change/set password for
+   @param $newpassword string new passwword for given login
+   @param $oldpassword string old password for given login
+   @param hook_password_encodebase64 boolean set to true if passwords are to be converted to base64 encoded strings
+*/
+function hook_command($hook, $login, $newpassword, $oldpassword = null, $hook_password_encodebase64 = false) {
 
-    if (!$resp->isSuccess()) {
-        error_log("Bad reCAPTCHA attempt with user $login");
-        foreach ($resp->getErrorCodes() as $code) {
-            error_log("reCAPTCHA error: $code");
+    $command = '';
+    if ( isset($hook_password_encodebase64) && $hook_password_encodebase64 ) {
+        $command = escapeshellcmd($hook).' '.escapeshellarg($login).' '.base64_encode($newpassword);
+
+        if ( ! is_null($oldpassword) ) {
+            $command .= ' '.base64_encode($oldpassword);
         }
-        return 'badcaptcha';
-    }
 
-    return '';
+    } else {
+        $command = escapeshellcmd($hook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);
+
+        if ( ! is_null($oldpassword) ) {
+            $command .= ' '.escapeshellarg($oldpassword);
+        }
+    }
+    return $command;
 }
 
-/* function allowed_rate(string $login)
+/* function allowed_rate(string $login, string $ip_addr, array $rrl_config)
  * Check if this login / this IP reached the limit fixed
  * @return bool allowed
  */
@@ -586,8 +743,8 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
     if ($rrl_config["max_per_user"] > 0) {
         $rrludb = $rrl_config["dbdir"] . "/ssp_rrl_users.json";
         if (!file_exists($rrludb)) {
-	    file_put_contents($rrludb,"{}");
-	}
+            file_put_contents($rrludb,"{}");
+        }
         $dbfh = fopen($rrludb . ".lock","w");
         if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
         flock($dbfh,LOCK_EX,$fblock);
@@ -610,7 +767,7 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
     if ($rrl_config["max_per_ip"] > 0) {
         $rrlidb = $rrl_config["dbdir"] . "/ssp_rrl_ips.json";
         if (!file_exists($rrlidb)) {
-	    file_put_contents($rrlidb,"{}");
+            file_put_contents($rrlidb,"{}");
         }
         $dbfh = fopen($rrlidb . ".lock","w");
         if (!$dbfh) { throw new Exception('nowrite to '.$rrludb); }
@@ -625,40 +782,11 @@ function allowed_rate($login,$ip_addr,$rrl_config) {
             }
         }
         $ips[$ip_addr] = $atts;
-	file_put_contents($rrlidb,json_encode($ips));
+        file_put_contents($rrlidb,json_encode($ips));
         flock($dbfh,LOCK_UN);
         if (count($atts) > $rrl_config["max_per_ip"]) {
             return false;
         }
     }
     return true;
-}
-
-/* @function string posthook_command(string $posthook, string  $login, string $newpassword, null|string $oldpassword, null|boolean $posthook_password_encodebase64)
-   Creates the command line to execute for the posthook process. Passwords will be base64 encoded if configured. Base64 encoding will prevent passwords with special 
-   characters to be modified by the escapeshellarg() function.
-   @param $postkook string script/command to execute for procesing posthook data
-   @param $login string username to change/set password for
-   @param $newpassword string new passwword for given login
-   @param $oldpassword string old password for given login
-   @param posthook_password_encodebase64 boolean set to true if passwords are to be converted to base64 encoded strings
-*/
-function posthook_command($posthook, $login, $newpassword, $oldpassword = null, $posthook_password_encodebase64 = false) {
-
-	$command = '';
-	if ( isset($posthook_password_encodebase64) && $posthook_password_encodebase64 ) {
-		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.base64_encode($newpassword);
-
-		if ( ! is_null($oldpassword) ) {
-			$command .= ' '.base64_encode($oldpassword);		
-		}
-
-	} else {		
-		$command = escapeshellcmd($posthook).' '.escapeshellarg($login).' '.escapeshellarg($newpassword);		
-
-		if ( ! is_null($oldpassword) ) {
-			$command .= ' '.escapeshellarg($oldpassword);		
-		}
-	}
-	return $command;
 }
